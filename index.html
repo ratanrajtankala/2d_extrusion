@@ -2,26 +2,22 @@
 <html>
 <head>
     <title>2D Shape Extrusion and Manipulation</title>
-    <style>
-        /* Add some basic styling */
-        #renderCanvas {
-            width: 75%;
-            height: 75%;
-            touch-action: none;
-        }
-        /* Add more styling as needed */
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <canvas id="renderCanvas"></canvas>
-    <button id="drawButton">Draw</button>
-    <button id="extrudeButton">Extrude</button>
-    <button id="moveButton">Move</button>
-    <button id="vertexEditButton">Vertex Edit</button>
+    <div class = "controls">
+        <button id="drawButton" class="mainButton">Draw</button>
+        <button id="extrudeButton" class="mainButton">Extrude</button>
+        <button id="moveButton" class="mainButton">Move</button>
+        <button id="vertexEditButton" class="mainButton">Vertex Edit</button>
+
+    </div>
+
     <div id="currentMode">Current Mode: None</div>
 
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/earcut"></script>
-    <script src="./scripts/app.js"></script>
+    <script src="./scripts/app.js" type="module"></script>
 </body>
 </html>

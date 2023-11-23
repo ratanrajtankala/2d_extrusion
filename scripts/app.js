@@ -1,3 +1,5 @@
+import { createScene } from "./createScene.js";
+
 const canvas = document.getElementById("renderCanvas");
 const drawButton = document.getElementById("drawButton");
 const extrudeButton = document.getElementById("extrudeButton");
@@ -5,37 +7,18 @@ const moveButton = document.getElementById("moveButton");
 const vertexEditButton = document.getElementById("vertexEditButton");
 const cm = document.getElementById("currentMode");
 
-let scene, engine, currentMode, drawnPoints = [];
+let scene, engine, currentMode, drawnPoints ,camera = [];
 
 const updateCurrentMode = () => {
     cm.textContent = `Current Mode: ${currentMode}`;
 }
-
-updateCurrentMode();
-
-// Babylon.js Scene Initialization
-const createScene = () => {
-    scene = new BABYLON.Scene(engine);
-
-    const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2.5, 5, BABYLON.Vector3.Zero(), scene);
-    camera.attachControl(canvas, true);
-
-    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-    light.intensity = 0.7;
-
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
-    let groundMaterial = new BABYLON.StandardMaterial("Ground Material", scene);
-    groundMaterial.diffuseColor = BABYLON.Color3.Red();
-    ground.material = groundMaterial;
-
-    return scene;
-};
 
 // Function to handle drawing mode
 const enterDrawMode = () => {
     // Logic for drawing mode
     // Implement mouse interactions to draw 2D shapes
     // Store drawn points in 'drawnPoints' array
+    console.log("Draw event begins");
     currentMode = "draw";
     updateCurrentMode();
     drawnPoints = []; // Clear previously drawn points
@@ -71,6 +54,7 @@ const enterDrawMode = () => {
     // Event listeners for pointer events
     canvas.addEventListener("pointerdown", pointerDown);
     canvas.addEventListener("pointerup", pointerUp);
+    console.log("Draw event ends");
 };
 
 // Function to handle extrusion process
@@ -91,7 +75,7 @@ const extrudeShape = () => {
     }
 
     console.log("path:", path )
-    fixed_depth = 1.2
+    let fixed_depth = 1.2
     const shape = BABYLON.MeshBuilder.ExtrudePolygon("extrudedShape", { shape: drawnPoints, depth: fixed_depth }, scene);
     shape.position.y += fixed_depth;
     // 'depth' parameter controls the extrusion height, adjust as needed
@@ -106,6 +90,7 @@ const extrudeShape = () => {
 // Function to handle moving objects mode
 const enterMoveMode = () => {
     currentMode = "move";
+    console.log("move event starts")
     updateCurrentMode();
     // Logic for moving objects
     // Implement click-and-drag functionality to move extruded objects
@@ -143,6 +128,8 @@ const enterMoveMode = () => {
     canvas.addEventListener("pointerdown", pointerDown);
     canvas.addEventListener("pointermove", pointerMove);
     canvas.addEventListener("pointerup", pointerUp);
+
+    console.log("move event ends")
 };
 
 // Function to handle vertex editing mode
@@ -246,7 +233,9 @@ vertexEditButton.addEventListener("click", enterVertexEditMode);
 // Babylon.js Engine Initialization
 window.addEventListener("DOMContentLoaded", () => {
     engine = new BABYLON.Engine(canvas, true);
-    scene = createScene();
+    let obj = createScene(engine, canvas);
+    scene = obj.scene;
+    camera = obj.camera;
     engine.runRenderLoop(() => {
         scene.render();
     });
