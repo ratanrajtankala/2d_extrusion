@@ -1,10 +1,24 @@
-// sharedState.js
 const sharedState = {
-    currentMode: 'draw',
+    currentMode: 'none',
     drawnPoints: [],
     selectedMesh: null,
     selectedVertex: null,
-    // Add other shared variables as needed
+    modeSpecificVariables: {
+        draw: {
+            scene: null, 
+            ground: null,
+        },
+        extrude: {
+            scene: null, 
+            ground: null,
+        },
+    },
+    cameraSpec: {
+        alpha: null,
+        beta: null,
+        radius: null,
+        target: null,
+    }
 };
 
 export default sharedState;
