@@ -13,6 +13,12 @@ const sharedState = {
             ground: null,
         },
     },
+    cameraSpec: {
+        alpha: null,
+        beta: null,
+        radius: null,
+        target: null,
+    }
 };
 
 export default sharedState;
