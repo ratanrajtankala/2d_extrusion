@@ -1,68 +1,70 @@
 import { createScene } from "./createScene.js";
+import { enterDrawMode, exitDrawMode } from './modes/drawMode.js';
+import sharedState from "./sharedState.js";
 
 const canvas = document.getElementById("renderCanvas");
-const drawButton = document.getElementById("drawButton");
-const extrudeButton = document.getElementById("extrudeButton");
-const moveButton = document.getElementById("moveButton");
-const vertexEditButton = document.getElementById("vertexEditButton");
+const engine = new BABYLON.Engine(canvas, true);
+// const drawButton = document.getElementById("drawButton");
+// const extrudeButton = document.getElementById("extrudeButton");
+// const moveButton = document.getElementById("moveButton");
+// const vertexEditButton = document.getElementById("vertexEditButton");
 const cm = document.getElementById("currentMode");
 
-let scene, engine, currentMode, drawnPoints ,camera = [];
+let scene, drawnPoints ,camera = [];
+let currentMode = 'none'; // Initialize with default mode
+
+
+const setCurrentMode = (newMode) => {
+    if (sharedState.currentMode !== newMode) {
+        sharedState.currentMode = newMode;
+        switch (newMode) {
+            case 'draw':
+                // exitExtrudeMode();
+                // exitMoveMode();
+                // exitVertexEditMode();
+                enterDrawMode(scene, canvas);
+                break;
+            case 'extrude':
+                exitDrawMode(canvas);
+                // exitMoveMode();
+                // exitVertexEditMode();
+                extrudeShape();
+                break;
+            case 'move':
+                exitDrawMode(canvas);
+                // exitExtrudeMode();
+                // exitVertexEditMode();
+                enterMoveMode();
+                break;
+            case 'vertexEdit':
+                // exitDrawMode();
+                // exitExtrudeMode();
+                // exitMoveMode();
+                enterVertexEditMode();
+                break;
+            case 'view':
+                exitDrawMode();
+            default:
+                console.log('Invalid mode');
+                break;
+        }
+    }
+};
+
 
 const updateCurrentMode = () => {
-    cm.textContent = `Current Mode: ${currentMode}`;
+    cm.textContent = `Current Mode: ${sharedState.currentMode}`;
 }
 
-// Function to handle drawing mode
-const enterDrawMode = () => {
-    // Logic for drawing mode
-    // Implement mouse interactions to draw 2D shapes
-    // Store drawn points in 'drawnPoints' array
-    console.log("Draw event begins");
-    currentMode = "draw";
-    updateCurrentMode();
-    drawnPoints = []; // Clear previously drawn points
-
-    const ground = scene.getMeshByName("ground");
-
-    const pointerDown = (event) => {
-        if (event.button !== 0) return; // Check for left mouse click
-
-        const pickInfo = scene.pick(scene.pointerX, scene.pointerY, (mesh) => mesh === ground);
-        if (pickInfo.hit) {
-            const hitPoint = pickInfo.pickedPoint;
-            drawnPoints.push(hitPoint.clone()); // Store the clicked point
-            // Visual cue: Add a marker or shape at the clicked point
-            // For example, create a small sphere to mark the point:
-            const marker = BABYLON.MeshBuilder.CreateSphere("marker", { diameter: 0.1 }, scene);
-            marker.position = hitPoint;
-        }
-    };
-
-    const pointerUp = (event) => {
-        
-        if (event.button === 2 && drawnPoints.length > 2) {
-            console.log("draw point: ", drawnPoints);
-            // Right-click to complete the shape (assuming at least 3 points)
-            // Create a polygon mesh using the drawn points
-            const shape = BABYLON.MeshBuilder.CreatePolygon("shape", { shape: drawnPoints }, scene);
-            console.log("shape: ", shape);
-            shape.convertToFlatShadedMesh(); // Optional: Improve visual appearance
-            // drawnPoints = []; // Clear points after creating the shape
-        }
-    };
-    // Event listeners for pointer events
-    canvas.addEventListener("pointerdown", pointerDown);
-    canvas.addEventListener("pointerup", pointerUp);
-    console.log("Draw event ends");
-};
 
 // Function to handle extrusion process
 const extrudeShape = () => {
     // Logic for extruding the drawn shape
     // Use 'drawnPoints' to create a 3D object with fixed height
+    let drawnPoints = sharedState.drawnPoints;
     console.log("Extrude event begins");
     console.log("drawnPoints: ", drawnPoints);
+    
 
     if (drawnPoints.length < 3) {
         console.error("Insufficient points to extrude. Please draw a complete shape first.");
@@ -225,14 +227,29 @@ const findClosestVertex = (mesh, point) => {
 };
 
 // Event listeners for mode buttons
-drawButton.addEventListener("click", enterDrawMode);
-extrudeButton.addEventListener("click", extrudeShape);
-moveButton.addEventListener("click", enterMoveMode);
-vertexEditButton.addEventListener("click", enterVertexEditMode);
+// Event listeners for mode buttons
+const drawButton = document.getElementById('drawButton');
+drawButton.addEventListener('click', () => {
+    setCurrentMode('draw');
+});
+
+const extrudeButton = document.getElementById('extrudeButton');
+extrudeButton.addEventListener('click', () => {
+    setCurrentMode('extrude');
+});
+
+const moveButton = document.getElementById('moveButton');
+moveButton.addEventListener('click', () => {
+    setCurrentMode('move');
+});
+
+const vertexEditButton = document.getElementById('vertexEditButton');
+vertexEditButton.addEventListener('click', () => {
+    setCurrentMode('vertexEdit');
+});
 
 // Babylon.js Engine Initialization
 window.addEventListener("DOMContentLoaded", () => {
-    engine = new BABYLON.Engine(canvas, true);
     let obj = createScene(engine, canvas);
     scene = obj.scene;
     camera = obj.camera;
