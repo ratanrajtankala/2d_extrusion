@@ -1,14 +1,12 @@
 import { createScene } from "./createScene.js";
 import { enterDrawMode, exitDrawMode } from "./modes/drawMode.js";
 import { enterExtrudeMode, exitExtrudeMode } from "./modes/extrudeMode.js";
+import { enterViewMode, exitViewMode } from "./modes/viewMode.js";
+import { enterMoveMode, exitMoveMode } from "./modes/moveMode.js";
 import sharedState from "./sharedState.js";
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
-// const drawButton = document.getElementById("drawButton");
-// const extrudeButton = document.getElementById("extrudeButton");
-// const moveButton = document.getElementById("moveButton");
-// const vertexEditButton = document.getElementById("vertexEditButton");
 const cm = document.getElementById("currentMode");
 
 let scene,
@@ -19,96 +17,58 @@ let currentMode = "none"; // Initialize with default mode
 // let alpha, beta, radius, target;
 
 const setCurrentMode = (newMode) => {
+    const prevMode = sharedState.currentMode;
   if (sharedState.currentMode !== newMode) {
+
+    switch (prevMode) {
+        case "draw":
+            exitDrawMode(canvas);
+            break;
+        case "extrude":
+            exitExtrudeMode();
+            break;
+        case "move":
+            exitMoveMode(canvas,camera);
+            break;
+        case "vertexEdit":
+            break;
+        case "view":
+            exitViewMode();
+            break;
+        default:
+            console.log("Invalid mode");
+            break;
+        }
+   
     sharedState.currentMode = newMode;
     switch (newMode) {
       case "draw":
-        exitExtrudeMode();
-        // exitMoveMode();
-        // exitVertexEditMode();
         enterDrawMode(scene, canvas);
         break;
       case "extrude":
-        exitDrawMode(canvas);
-        // exitMoveMode();
-        // exitVertexEditMode();
         enterExtrudeMode();
         break;
       case "move":
-        exitDrawMode(canvas);
-        exitExtrudeMode();
-        // exitVertexEditMode();
-        enterMoveMode();
+        enterMoveMode(scene,canvas,camera);
         break;
       case "vertexEdit":
-        exitDrawMode();
-        exitExtrudeMode();
-        // exitMoveMode();
         enterVertexEditMode();
         break;
       case "view":
-        exitDrawMode();
+        enterViewMode();
+        break;
       default:
         console.log("Invalid mode");
         break;
     }
   }
+  updateCurrentMode(newMode);
 };
 
 const updateCurrentMode = () => {
   cm.textContent = `Current Mode: ${sharedState.currentMode}`;
 };
 
-// Function to handle moving objects mode
-const enterMoveMode = () => {
-  currentMode = "move";
-  console.log("move event starts");
-  updateCurrentMode();
-  // Logic for moving objects
-  // Implement click-and-drag functionality to move extruded objects
-
-//   camera.inputs.clear();
-
-  const ground = scene.getMeshByName("ground");
-  const pickedMeshes = [];
-
-  const pointerDown = (event) => {
-    const pickInfo = scene.pick(scene.pointerX, scene.pointerY);
-    if (pickInfo.hit && pickInfo.pickedMesh !== ground) {
-      // Check if the picked mesh is not the ground
-      pickedMeshes.push(pickInfo.pickedMesh);
-    }
-  };
-
-  const pointerMove = (event) => {
-    if (pickedMeshes.length > 0) {
-      const pickInfo = scene.pick(
-        scene.pointerX,
-        scene.pointerY,
-        (mesh) => mesh === ground
-      );
-      if (pickInfo.hit) {
-        // Move the picked meshes along the ground plane
-        const newPosition = pickInfo.pickedPoint.clone();
-        for (let i = 0; i < pickedMeshes.length; i++) {
-          pickedMeshes[i].position.x = newPosition.x;
-          pickedMeshes[i].position.z = newPosition.z;
-        }
-      }
-    }
-  };
-
-  const pointerUp = (event) => {
-    pickedMeshes.length = 0; // Clear the picked meshes array
-  };
-
-  // Event listeners for pointer events
-  canvas.addEventListener("pointerdown", pointerDown);
-  canvas.addEventListener("pointermove", pointerMove);
-  canvas.addEventListener("pointerup", pointerUp);
-
-  console.log("move event ends");
-};
 
 // Function to handle vertex editing mode
 const enterVertexEditMode = () => {
@@ -216,6 +176,11 @@ const findClosestVertex = (mesh, point) => {
 
 // Event listeners for mode buttons
 // Event listeners for mode buttons
+
+const viewButton = document.getElementById("viewButton");
+viewButton.addEventListener("click", () => {
+  setCurrentMode("view");
+});
 const drawButton = document.getElementById("drawButton");
 drawButton.addEventListener("click", () => {
   setCurrentMode("draw");
@@ -241,6 +206,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let obj = createScene(engine, canvas);
   scene = obj.scene;
   camera = obj.camera;
+  sharedState.camera = camera;
   engine.runRenderLoop(() => {
     scene.render();
   });
