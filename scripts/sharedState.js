@@ -3,6 +3,7 @@ const sharedState = {
     drawnPoints: [],
     selectedMesh: null,
     selectedVertex: null,
+    selectedPolygon: null,
     modeSpecificVariables: {
         draw: {
             scene: null, 
@@ -11,6 +12,11 @@ const sharedState = {
         extrude: {
             scene: null, 
             ground: null,
+        },
+        move: {
+            scene: null, 
+            ground: null,
+            pickedMeshes: [],
         },
     },
     cameraSpec: {
