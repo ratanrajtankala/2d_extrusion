@@ -5,14 +5,38 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    
-    <canvas id="renderCanvas"></canvas>
-    <div class = "controls">
-        <button id="viewButton" class="mainButton">View</button>
-        <button id="drawButton" class="mainButton">Draw</button>
-        <button id="extrudeButton" class="mainButton">Extrude</button>
-        <button id="moveButton" class="mainButton">Move</button>
-        <button id="vertexEditButton" class="mainButton">Vertex Edit</button>
+    <div class="navbar">
+        <div class="navbar-icon">
+            <img src="./icons8-geometry-50.png" alt="" width="30" height="30" class="d-inline-block align-text-top">
+        </div>
+        <div class="navbar-title">
+            2D Shape Extrusion and Manipulation
+        </div>
+    </div>
+
+    <div class="main-app">
+        <div class="main-app-canvas">
+            <canvas id="renderCanvas"></canvas>
+        </div>
+        <div class="sidebar">
+            <div class="sidebar-modes">
+                <h1>Modes</h1>
+                <div class = "controls">
+                    <button id="viewButton" class="mainButton">View</button>
+                    <button id="drawButton" class="mainButton">Draw</button>
+                    <button id="extrudeButton" class="mainButton">Extrude</button>
+                    <button id="moveButton" class="mainButton">Move</button>
+                    <button id="vertexEditButton" class="mainButton">Vertex Edit</button>   
+                </div> 
+            </div>
+            <div class="sidebar-status">
+                <h1>Status</h1>
+                <div id="currentMode">Current Mode: None</div>
+            </div>
+            
+
+            
+        </div>
     </div>
     <div class="overlay" id="overlay">
         <div class="modal">
@@ -22,7 +46,7 @@
         </div>
     </div>
 
-    <div id="currentMode">Current Mode: None</div>
+    
 
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/earcut"></script>

@@ -3,6 +3,10 @@ import { enterDrawMode, exitDrawMode } from "./modes/drawMode.js";
 import { enterExtrudeMode, exitExtrudeMode } from "./modes/extrudeMode.js";
 import { enterViewMode, exitViewMode } from "./modes/viewMode.js";
 import { enterMoveMode, exitMoveMode } from "./modes/moveMode.js";
+import {
+  enterVertexEditMode,
+  exitVertexEditMode,
+} from "./modes/VertexEditMode.js";
 import sharedState from "./sharedState.js";
 
 const canvas = document.getElementById("renderCanvas");
@@ -28,6 +32,7 @@ const setCurrentMode = (newMode) => {
         exitMoveMode(canvas, camera);
         break;
       case "vertexEdit":
+        exitVertexEditMode();
         break;
       case "view":
         exitViewMode();
@@ -49,7 +54,7 @@ const setCurrentMode = (newMode) => {
         enterMoveMode(scene, canvas, camera);
         break;
       case "vertexEdit":
-        enterVertexEditMode();
+        enterVertexEditMode(scene, canvas, camera);
         break;
       case "view":
         enterViewMode();
@@ -66,111 +71,104 @@ const updateCurrentMode = () => {
   cm.textContent = `Current Mode: ${sharedState.currentMode}`;
 };
 
-const enterVertexEditMode = () => {
-    // Logic for vertex editing
-    // Allow users to select vertices and move them using mouse interactions
-    currentMode = "vertexEdit";
-    updateCurrentMode();
+// const enterVertexEditMode = () => {
+//     // Logic for vertex editing
+//     // Allow users to select vertices and move them using mouse interactions
+//     currentMode = "vertexEdit";
+//     updateCurrentMode();
 
-    const ground = scene.getMeshByName("ground");
-    let selectedVertex = null;
-    let selectedMesh = null;
-    let selectedVertexIndex = 0; // Index of the selected vertex
-    let isDragging = false; // Flag to indicate vertex dragging   
-    console.log ("entering enterVertexEditMode");  
+//     const ground = scene.getMeshByName("ground");
+//     let selectedVertex = null;
+//     let selectedMesh = null;
+//     let selectedVertexIndex = 0; // Index of the selected vertex
+//     let isDragging = false; // Flag to indicate vertex dragging
+//     console.log ("entering enterVertexEditMode");
 
-    const pointerDown = (event) => {
-        const pickInfo = scene.pick(scene.pointerX, scene.pointerY);
-        if (pickInfo.hit && pickInfo.pickedMesh !== ground) {
-            selectedMesh = pickInfo.pickedMesh;
-            changeMeshColour(selectedMesh);
-            isDragging = true;
+//     const pointerDown = (event) => {
+//         const pickInfo = scene.pick(scene.pointerX, scene.pointerY);
+//         if (pickInfo.hit && pickInfo.pickedMesh !== ground) {
+//             selectedMesh = pickInfo.pickedMesh;
+//             changeMeshColour(selectedMesh);
+//             isDragging = true;
 
-            selectedVertexIndex = findClosestVertexIndex(selectedMesh, pickInfo.pickedPoint); //selectedVertexIndex
-            let vertices = transformedVertices(selectedMesh);
-            if (selectedVertexIndex !== null) {
-                // Perform vertex selection visual feedback
-                // For example, change color or scale of the selected vertex
-                console.log("vertex: ", selectedVertexIndex);
-                const vertexPosition = new BABYLON.Vector3(
-                  vertices[selectedVertexIndex * 3], // x-coordinate of the vertex
-                  vertices[selectedVertexIndex * 3 + 1], // y-coordinate of the vertex
-                  vertices[selectedVertexIndex * 3 + 2] // z-coordinate of the vertex
-                );
-        
-                // const sphere = addSphereNearVertex(scene, vertexPosition);
-                const sphereRadius = 0.1; // Adjust the radius of the spheres as needed
-                const sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
-                sphereMaterial.diffuseColor = new BABYLON.Color3(0, 1, 0); // Adjust color as desired
-                const sphere = BABYLON.MeshBuilder.CreateSphere(`sphere`, { diameter: sphereRadius * 2 }, scene);
-                sphere.material = sphereMaterial;
-                sphere.position = vertices[selectedVertexIndex];
-            }
-        }
+//             selectedVertexIndex = findClosestVertexIndex(selectedMesh, pickInfo.pickedPoint); //selectedVertexIndex
+//             let vertices = transformedVertices(selectedMesh);
+//             if (selectedVertexIndex !== null) {
+//                 // Perform vertex selection visual feedback
+//                 // For example, change color or scale of the selected vertex
+//                 console.log("vertex: ", selectedVertexIndex);
+//                 const vertexPosition = new BABYLON.Vector3(
+//                   vertices[selectedVertexIndex * 3], // x-coordinate of the vertex
+//                   vertices[selectedVertexIndex * 3 + 1], // y-coordinate of the vertex
+//                   vertices[selectedVertexIndex * 3 + 2] // z-coordinate of the vertex
+//                 );
 
-        // const pickResult = scene.pick(scene.pointerX, scene.pointerY);
-        // if (pickResult.hit && pickResult.pickedMesh === selectedMesh) {
-        //     isDragging = true;
-        // }
-    }
+//                 // const sphere = addSphereNearVertex(scene, vertexPosition);
+//                 const sphereRadius = 0.1; // Adjust the radius of the spheres as needed
+//                 const sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
+//                 sphereMaterial.diffuseColor = new BABYLON.Color3(0, 1, 0); // Adjust color as desired
+//                 const sphere = BABYLON.MeshBuilder.CreateSphere(`sphere`, { diameter: sphereRadius * 2 }, scene);
+//                 sphere.material = sphereMaterial;
+//                 sphere.position = vertices[selectedVertexIndex];
+//             }
+//         }
+//     }
 
-    const pointerUp = (event) => {
-        if (isDragging) {
-            const pickResult = scene.pick(scene.pointerX, scene.pointerY);
-            if (pickResult.hit && pickResult.pickedMesh === selectedMesh) {
-                const newPosition = pickResult.pickedPoint;
-                moveSelectedVertex(newPosition, selectedVertexIndex, selectedMesh);
-            }
-        }
-    }
+//     const pointerUp = (event) => {
+//         if (isDragging) {
+//             const pickResult = scene.pick(scene.pointerX, scene.pointerY);
+//             if (pickResult.hit && pickResult.pickedMesh === selectedMesh) {
+//                 const newPosition = pickResult.pickedPoint;
+//                 moveSelectedVertex(newPosition, selectedVertexIndex, selectedMesh);
+//             }
+//         }
+//     }
 
-    const pointerMove = (event) => {
-        isDragging = false;
-    }
+//     const pointerMove = (event) => {
+//         isDragging = false;
+//     }
 
-    canvas.addEventListener("pointerdown", pointerDown);
-    // canvas.addEventListener("pointermove", pointerMove);
-    // canvas.addEventListener("pointerup", pointerUp);
-}
+//     canvas.addEventListener("pointerdown", pointerDown);
+//     canvas.addEventListener("pointermove", pointerMove);
+//     canvas.addEventListener("pointerup", pointerUp);
+// }
 
-const findClosestVertexIndex = (mesh, point) => {
-    const vertices = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-    const worldMatrix = mesh.getWorldMatrix();
+// const findClosestVertexIndex = (mesh, point) => {
+//     const vertices = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+//     const worldMatrix = mesh.getWorldMatrix();
 
-    let minDistance = Number.MAX_VALUE;
-    let closestVertexIndex = -1;
+//     let minDistance = Number.MAX_VALUE;
+//     let closestVertexIndex = -1;
 
-    for (let i = 0; i < vertices.length; i += 3) {
-        let vertex = BABYLON.Vector3.FromArray(vertices, i).multiply(mesh.scaling); // Get vertex in world space
-        vertex = BABYLON.Vector3.TransformCoordinates(vertex, worldMatrix); // Transform to world coordinates
+//     for (let i = 0; i < vertices.length; i += 3) {
+//         let vertex = BABYLON.Vector3.FromArray(vertices, i).multiply(mesh.scaling); // Get vertex in world space
+//         vertex = BABYLON.Vector3.TransformCoordinates(vertex, worldMatrix); // Transform to world coordinates
 
-        const distance = BABYLON.Vector3.Distance(vertex, point);
-        if (distance < minDistance) {
-            minDistance = distance;
-            closestVertexIndex = i / 3; // Divide by 3 to get the index
-        }
-    }
+//         const distance = BABYLON.Vector3.Distance(vertex, point);
+//         if (distance < minDistance) {
+//             minDistance = distance;
+//             closestVertexIndex = i / 3; // Divide by 3 to get the index
+//         }
+//     }
 
-    return closestVertexIndex;
-};
+//     return closestVertexIndex;
+// };
 
-// Function to move the selected vertex
-const moveSelectedVertex = (newPosition, selectedVertexIndex, selectedMesh) => {
-    const positions = selectedMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-    positions[selectedVertexIndex * 3] = newPosition.x;
-    positions[selectedVertexIndex * 3 + 1] = newPosition.y;
-    positions[selectedVertexIndex * 3 + 2] = newPosition.z;
+// // Function to move the selected vertex
+// const moveSelectedVertex = (newPosition, selectedVertexIndex, selectedMesh) => {
+//     const positions = selectedMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+//     positions[selectedVertexIndex * 3] = newPosition.x;
+//     positions[selectedVertexIndex * 3 + 1] = newPosition.y;
+//     positions[selectedVertexIndex * 3 + 2] = newPosition.z;
 
-    selectedMesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
-    selectedMesh._resetPointsArrayCache();
-    selectedMesh._resetNormalsCache();
-    selectedMesh._resetFacetData();
-    selectedMesh.computeWorldMatrix(true);
-};
+//     selectedMesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+//     selectedMesh._resetPointsArrayCache();
+//     selectedMesh._resetNormalsCache();
+//     selectedMesh._resetFacetData();
+//     selectedMesh.computeWorldMatrix(true);
+// };
 
-
-
-
+// OLDERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR from below
 
 // Function to handle vertex editing mode
 // const enterVertexEditMode = () => {
@@ -230,7 +228,7 @@ const moveSelectedVertex = (newPosition, selectedVertexIndex, selectedMesh) => {
 //   };
 
 //   function addSpheresToVertices(selectedMesh) {
-    
+
 //     const vertices = transformedVertices(selectedMesh);
 //     // Loop through the transformed vertices and create spheres at those positions
 //     const sphereRadius = 0.1; // Adjust the radius of the spheres as needed
@@ -291,45 +289,51 @@ const moveSelectedVertex = (newPosition, selectedVertexIndex, selectedMesh) => {
 //   canvas.addEventListener("pointerup", pointerUp);
 // };
 
-
 const addSphereNearVertex = (scene, position) => {
-    const sphere = BABYLON.MeshBuilder.CreateSphere(
-      "sphere",
-      { diameter: 0.2 },
-      scene
-    );
-    sphere.position = position.clone(); // Position the sphere at the selected vertex
-    sphere.material = new BABYLON.StandardMaterial("sphereMat", scene);
-    sphere.material.diffuseColor = new BABYLON.Color3(1, 0, 0); // Set sphere color
-    return sphere;
-  };
+  const sphere = BABYLON.MeshBuilder.CreateSphere(
+    "sphere",
+    { diameter: 0.2 },
+    scene
+  );
+  sphere.position = position.clone(); // Position the sphere at the selected vertex
+  sphere.material = new BABYLON.StandardMaterial("sphereMat", scene);
+  sphere.material.diffuseColor = new BABYLON.Color3(1, 0, 0); // Set sphere color
+  return sphere;
+};
 
 function changeMeshColour(selectedMesh) {
-    
-    let newMaterial = new BABYLON.StandardMaterial("newMaterial", scene);
-    newMaterial.diffuseColor = new BABYLON.Color3(0, 0, 1); // Change to red color (RGB: 1, 0, 0)
-    selectedMesh.material = newMaterial;
-
+  let newMaterial = new BABYLON.StandardMaterial("newMaterial", scene);
+  newMaterial.diffuseColor = new BABYLON.Color3(0, 0, 1); // Change to red color (RGB: 1, 0, 0)
+  selectedMesh.material = newMaterial;
 }
 
 function transformedVertices(selectedMesh) {
-    // Get the updated world matrix of the mesh after transformation
-    const worldMatrix = selectedMesh.getWorldMatrix();
+  // Get the updated world matrix of the mesh after transformation
+  const worldMatrix = selectedMesh.getWorldMatrix();
 
-    // Get the original vertices data
-    const originalVerticesData = selectedMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+  // Get the original vertices data
+  const originalVerticesData = selectedMesh.getVerticesData(
+    BABYLON.VertexBuffer.PositionKind
+  );
 
-    // Create an array to store transformed vertices
-    const transformedVertices = [];
+  // Create an array to store transformed vertices
+  const transformedVertices = [];
 
-    // Transform each vertex using the world matrix
-    for (let i = 0; i < originalVerticesData.length; i += 3) {
-        const vertex = new BABYLON.Vector3(originalVerticesData[i], originalVerticesData[i + 1], originalVerticesData[i + 2]);
-        const transformedVertex = BABYLON.Vector3.TransformCoordinates(vertex, worldMatrix);
-        transformedVertices.push(transformedVertex);
-    }
-    return transformedVertices;
+  // Transform each vertex using the world matrix
+  for (let i = 0; i < originalVerticesData.length; i += 3) {
+    const vertex = new BABYLON.Vector3(
+      originalVerticesData[i],
+      originalVerticesData[i + 1],
+      originalVerticesData[i + 2]
+    );
+    const transformedVertex = BABYLON.Vector3.TransformCoordinates(
+      vertex,
+      worldMatrix
+    );
+    transformedVertices.push(transformedVertex);
   }
+  return transformedVertices;
+}
 
 // Function to find the closest vertex to a given point on a mesh
 // const findClosestVertex = (mesh, point) => {
@@ -365,29 +369,33 @@ function transformedVertices(selectedMesh) {
 // };
 
 function findClosestVertex(mesh, selectedPoint) {
-    var closestVertexIndex = -1;
-    var closestDistance = Number.MAX_VALUE;
+  var closestVertexIndex = -1;
+  var closestDistance = Number.MAX_VALUE;
 
-    // Get transformed vertex positions of the mesh
-    var vertexData = BABYLON.VertexData.ExtractFromMesh(mesh);
-    var transformedPositions = transformedVertices(mesh);
+  // Get transformed vertex positions of the mesh
+  var vertexData = BABYLON.VertexData.ExtractFromMesh(mesh);
+  var transformedPositions = transformedVertices(mesh);
 
-    // Loop through the transformed vertex positions
-    for (var i = 0; i < transformedPositions.length; i += 3) {
-        var vertex = new BABYLON.Vector3(transformedPositions[i], transformedPositions[i + 1], transformedPositions[i + 2]);
+  // Loop through the transformed vertex positions
+  for (var i = 0; i < transformedPositions.length; i += 3) {
+    var vertex = new BABYLON.Vector3(
+      transformedPositions[i],
+      transformedPositions[i + 1],
+      transformedPositions[i + 2]
+    );
 
-        // Calculate distance between the selected point and the current vertex
-        var distance = BABYLON.Vector3.Distance(vertex, selectedPoint);
+    // Calculate distance between the selected point and the current vertex
+    var distance = BABYLON.Vector3.Distance(vertex, selectedPoint);
 
-        // Check if this vertex is closer than the previously closest one
-        if (distance < closestDistance) {
-            closestDistance = distance;
-            closestVertexIndex = i / 3; // Calculate the vertex index
-        }
+    // Check if this vertex is closer than the previously closest one
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestVertexIndex = i / 3; // Calculate the vertex index
     }
+  }
 
-    // Return the index of the closest vertex
-    return closestVertexIndex;
+  // Return the index of the closest vertex
+  return closestVertexIndex;
 }
 
 // Event listeners for mode buttons
