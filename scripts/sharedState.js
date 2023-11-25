@@ -21,9 +21,10 @@ const sharedState = {
     vertexEdit: {
       scene: null,
       ground: null,
+      vertices: [],
       selectedVertex: null,
       selectedMesh: null,
-      selectedVertexIndex: 0,
+      selectedVertexIndex: 3,
       isDragging:0,
     },
   },

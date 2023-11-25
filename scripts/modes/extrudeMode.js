@@ -1,4 +1,5 @@
 import sharedState from '../sharedState.js';
+import { showPrompt } from '../components/prompt.js';
 
 const enterExtrudeMode = () => {
     // Logic for extruding the drawn shape
@@ -6,10 +7,9 @@ const enterExtrudeMode = () => {
     let path = [];
     const fixed_depth = 1.2;
     const scene = sharedState.modeSpecificVariables.draw.scene;
-    console.log("Extrude event begins");
-    // console.log("drawnPoints: ", drawnPoints);
   
     if (drawnPoints.length < 3) {
+      showPrompt("Alert", 'Draw atleast 3 points to extrude a shape');
       console.error(
         "Insufficient points to extrude. Please draw a complete shape first."
       );
@@ -33,7 +33,6 @@ const enterExtrudeMode = () => {
   };
 
   const exitExtrudeMode = () => {
-    console.log("Extrude event ends");
   }
 
   export { enterExtrudeMode, exitExtrudeMode };

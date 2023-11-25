@@ -12,15 +12,12 @@ const enterVertexEditMode = (scene, canvas, camera) => {
   sharedState.currentMode = "vertexEdit";
   sharedState.modeSpecificVariables.vertexEdit.scene = scene;
   sharedState.modeSpecificVariables.vertexEdit.ground = scene.getMeshByName("ground");
-  console.log("move event starts");
 
-  console.log("entering enterVertexEditMode");
-
-
+  sharedState.camera.detachControl(canvas);
 
   canvas.addEventListener("pointerdown", movePointerDown);
-  canvas.addEventListener("pointermove", movePointerMove);
-  canvas.addEventListener("pointerup", movePointerUp);
+    canvas.addEventListener("pointermove", movePointerMove);
+    canvas.addEventListener("pointerup", movePointerUp);
 };
 
 // Function to move the selected vertex
@@ -97,8 +94,9 @@ const findClosestVertexIndex = (mesh, point) => {
   return closestVertexIndex;
 };
 
-const exitVertexEditMode = () => {
-  console.log("vertex Edit mode ends");
+const exitVertexEditMode = (canvas,camera) => {
+  camera.attachControl(canvas, true);
+  sharedState.modeSpecificVariables.vertexEdit.isDragging = false;
 };
 
 export {
@@ -107,5 +105,5 @@ export {
   findClosestVertexIndex,
   transformedVertices,
   exitVertexEditMode,
-  moveSelectedVertex
+  moveSelectedVertex,
 };

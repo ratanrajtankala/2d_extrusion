@@ -41,7 +41,6 @@ const pointerDown = (event) => {
       if (pickInfoM.hit && pickInfoM.pickedMesh !== groundM) {
         // Check if the picked mesh is not the ground
         pickedMeshes.push(pickInfoM.pickedMesh);
-        console.log("picked mesh: ", pickInfoM.pickedMesh);
       }
       sharedState.modeSpecificVariables.move.pickedMeshes = pickedMeshes;
 
@@ -56,16 +55,21 @@ const pointerDown = (event) => {
         sharedState.selectedMesh = selectedMesh;
         changeMeshColour(selectedMesh);
         sharedState.modeSpecificVariables.vertexEdit.isDragging = true;
-
+        
+        let vertices = transformedVertices(selectedMesh);
+        sharedState.modeSpecificVariables.vertexEdit.vertices = vertices;
         let selectedVertexIndex = findClosestVertexIndex(
           selectedMesh,
-          pickInfoVE.pickedPoint
+          pickInfoVE.pickedPoint,
+          vertices
         ); //selectedVertexIndex
-        let vertices = transformedVertices(selectedMesh);
+
+        sharedState.modeSpecificVariables.move.selectedVertexIndex = selectedVertexIndex;
+
+        
         if (selectedVertexIndex !== null) {
           // Perform vertex selection visual feedback
           // For example, change color or scale of the selected vertex
-          console.log("vertex: ", selectedVertexIndex);
           const vertexPosition = new BABYLON.Vector3(
             vertices[selectedVertexIndex * 3], // x-coordinate of the vertex
             vertices[selectedVertexIndex * 3 + 1], // y-coordinate of the vertex
@@ -81,7 +85,7 @@ const pointerDown = (event) => {
           sphereMaterial.diffuseColor = new BABYLON.Color3(0, 1, 0); // Adjust color as desired
           const sphere = BABYLON.MeshBuilder.CreateSphere(
             `sphere`,
-            { diameter: sphereRadius * 2 },
+            { diameter: sphereRadius * 1 },
             sceneVE
           );
           sphere.material = sphereMaterial;
@@ -89,7 +93,6 @@ const pointerDown = (event) => {
         }
       }
   }
-  console.log("pointerDown: move", sharedState);
 };
 
 const pointerUp = (event) => {
@@ -107,7 +110,6 @@ const pointerUp = (event) => {
           { shape: drawnPoints },
           sceneD
         );
-        console.log("points events: ", drawnPoints);
         shape.convertToFlatShadedMesh(); // Optional: Improve visual appearance
         sharedState.selectedPolygon = shape;
         // drawnPoints = []; // Clear points after creating the shape
@@ -121,26 +123,13 @@ const pointerUp = (event) => {
       break;
     case "move":
       // Move mode pointer up logic
-      console.log(
-        "pointeUp move before: ",
-        sharedState.modeSpecificVariables.move.pickedMeshes
-      );
       let pickedMeshes = sharedState.modeSpecificVariables.move.pickedMeshes;
       pickedMeshes.length = 0;
-      console.log("pointeUp move: ", sharedState);
       break;
     case "vertexEdit":
-        const sceneVE = sharedState.modeSpecificVariables.vertexEdit.scene;
-        const isDragging = sharedState.modeSpecificVariables.vertexEdit.isDragging;
-        const selectedMesh = sharedState.selectedMesh;
-        if (isDragging) {
-            const pickResult = sceneVE.pick(sceneVE.pointerX, sceneVE.pointerY);
-            if (pickResult.hit && pickResult.pickedMesh === selectedMesh) {
-              const newPosition = pickResult.pickedPoint;
-              moveSelectedVertex(newPosition, selectedVertexIndex, selectedMesh);
-            }
-          }
-        break;
+        sharedState.modeSpecificVariables.vertexEdit.isDragging = false;
+      break;
+        
   }
 };
 
@@ -155,7 +144,6 @@ const pointerMove = (event) => {
       break;
     case "move":
       // Move mode pointer move logic
-      // console.log("pointerMove move: ", sharedState);
       const scene = sharedState.modeSpecificVariables.move.scene;
       const ground = sharedState.modeSpecificVariables.move.ground;
       const pickedMeshes = sharedState.modeSpecificVariables.move.pickedMeshes;
@@ -178,7 +166,31 @@ const pointerMove = (event) => {
       }
       break;
     case "vertexEdit":
-      sharedState.modeSpecificVariables.vertexEdit.isDragging = false;
+      const sceneVE = sharedState.modeSpecificVariables.vertexEdit.scene;
+      const groundVE = sharedState.modeSpecificVariables.vertexEdit.ground;
+        const isDragging = sharedState.modeSpecificVariables.vertexEdit.isDragging;
+
+        
+        
+        if (isDragging) {
+            const pickInfoVE = sceneVE.pick(sceneVE.pointerX, sceneVE.pointerY);
+            if (pickInfoVE.hit && pickInfoVE.pickedMesh !== groundVE) {
+            let selectedMesh = pickInfoVE.pickedMesh;
+            sharedState.selectedMesh = selectedMesh;
+    
+    
+            const selectedVertexIndex =  findClosestVertexIndex(
+                selectedMesh,
+                pickInfoVE.pickedPoint,
+                sharedState.modeSpecificVariables.vertexEdit.vertices
+              );
+            const pickResult = sceneVE.pick(sceneVE.pointerX, sceneVE.pointerY);
+            if (pickResult.hit && pickResult.pickedMesh === selectedMesh) {
+                const newPosition = pickResult.pickedPoint;
+                //moveSelectedVertex(newPosition, selectedVertexIndex, selectedMesh);
+            }
+            }
+        };
       break;
   }
 };
