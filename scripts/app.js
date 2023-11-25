@@ -17,29 +17,28 @@ let currentMode = "none"; // Initialize with default mode
 // let alpha, beta, radius, target;
 
 const setCurrentMode = (newMode) => {
-    const prevMode = sharedState.currentMode;
+  const prevMode = sharedState.currentMode;
   if (sharedState.currentMode !== newMode) {
-
     switch (prevMode) {
-        case "draw":
-            exitDrawMode(canvas);
-            break;
-        case "extrude":
-            exitExtrudeMode();
-            break;
-        case "move":
-            exitMoveMode(canvas,camera);
-            break;
-        case "vertexEdit":
-            break;
-        case "view":
-            exitViewMode();
-            break;
-        default:
-            console.log("Invalid mode");
-            break;
-        }
-   
+      case "draw":
+        exitDrawMode(canvas);
+        break;
+      case "extrude":
+        exitExtrudeMode();
+        break;
+      case "move":
+        exitMoveMode(canvas, camera);
+        break;
+      case "vertexEdit":
+        break;
+      case "view":
+        exitViewMode();
+        break;
+      default:
+        console.log("Invalid mode");
+        break;
+    }
+
     sharedState.currentMode = newMode;
     switch (newMode) {
       case "draw":
@@ -49,7 +48,7 @@ const setCurrentMode = (newMode) => {
         enterExtrudeMode();
         break;
       case "move":
-        enterMoveMode(scene,canvas,camera);
+        enterMoveMode(scene, canvas, camera);
         break;
       case "vertexEdit":
         enterVertexEditMode();
@@ -69,7 +68,6 @@ const updateCurrentMode = () => {
   cm.textContent = `Current Mode: ${sharedState.currentMode}`;
 };
 
-
 // Function to handle vertex editing mode
 const enterVertexEditMode = () => {
   // Logic for vertex editing
@@ -86,15 +84,72 @@ const enterVertexEditMode = () => {
     if (pickInfo.hit && pickInfo.pickedMesh !== ground) {
       // Check if the picked mesh is not the ground
       selectedMesh = pickInfo.pickedMesh;
+
+      addSpheresToVertices(selectedMesh);
+
+      var originalMaterial = selectedMesh.material;
+      var newMaterial = new BABYLON.StandardMaterial("newMaterial", scene);
+      newMaterial.diffuseColor = new BABYLON.Color3(0, 0, 1); // Change to red color (RGB: 1, 0, 0)
+      selectedMesh.material = newMaterial;
+
+      const vertices = selectedMesh.getVerticesData(
+        BABYLON.VertexBuffer.PositionKind
+      );
+
+      console.log("verticesssss: ", vertices);
       // Logic to identify the clicked vertex on the selected mesh
       // For example, find the closest vertex to the picked point:
       selectedVertex = findClosestVertex(selectedMesh, pickInfo.pickedPoint);
       if (selectedVertex !== null) {
         // Perform vertex selection visual feedback
         // For example, change color or scale of the selected vertex
+        console.log("vertex: ", selectedVertex);
+        const vertexPosition = new BABYLON.Vector3(
+          vertices[selectedVertex * 3], // x-coordinate of the vertex
+          vertices[selectedVertex * 3 + 1], // y-coordinate of the vertex
+          vertices[selectedVertex * 3 + 2] // z-coordinate of the vertex
+        );
+
+        // const sphere = addSphereNearVertex(scene, vertexPosition);
       }
     }
   };
+
+  const addSphereNearVertex = (scene, position) => {
+    const sphere = BABYLON.MeshBuilder.CreateSphere(
+      "sphere",
+      { diameter: 0.2 },
+      scene
+    );
+    sphere.position = position.clone(); // Position the sphere at the selected vertex
+    sphere.material = new BABYLON.StandardMaterial("sphereMat", scene);
+    sphere.material.diffuseColor = new BABYLON.Color3(1, 0, 0); // Set sphere color
+    return sphere;
+  };
+
+  function addSpheresToVertices(selectedMesh) {
+    selectedMesh.refreshBoundingInfo(true);
+    selectedMesh.computeWorldMatrix(true);
+    selectedMesh.updateFacetData();
+    var vertexData = BABYLON.VertexData.ExtractFromMesh(selectedMesh);
+    var positions = vertexData.positions;
+
+    // Create spheres at each vertex position
+    for (var i = 0; i < positions.length; i += 3) {
+      var sphere = BABYLON.MeshBuilder.CreateSphere(
+        "sphere",
+        { diameter: 0.1 },
+        scene
+      );
+
+      // Set sphere positions based on the vertex positions
+      sphere.position = new BABYLON.Vector3(
+        positions[i],
+        positions[i + 1],
+        positions[i + 2]
+      );
+    }
+  }
 
   const pointerMove = (event) => {
     if (selectedVertex !== null && selectedMesh !== null) {
