@@ -14,8 +14,6 @@ let scene,
   camera = [];
 let currentMode = "none"; // Initialize with default mode
 
-// let alpha, beta, radius, target;
-
 const setCurrentMode = (newMode) => {
     const prevMode = sharedState.currentMode;
   if (sharedState.currentMode !== newMode) {
