@@ -1,6 +1,6 @@
 import sharedState from "./sharedState.js";
 import { showPrompt } from "./components/prompt.js";
-import {changeMeshColour, findClosestVertexIndex, transformedVertices,moveSelectedVertex} from "./modes/VertexEditMode.js";
+import {changeMeshColour, findClosestVertexIndex, transformedVertices,moveSelectedVertex} from "./modes/vertexEditMode.js";
 
 const pointerDown = (event) => {
   // Pointer down logic for drawing mode and other modes
@@ -55,7 +55,7 @@ const pointerDown = (event) => {
         sharedState.selectedMesh = selectedMesh;
         changeMeshColour(selectedMesh);
         sharedState.modeSpecificVariables.vertexEdit.isDragging = true;
-        
+
         let vertices = transformedVertices(selectedMesh);
         sharedState.modeSpecificVariables.vertexEdit.vertices = vertices;
         let selectedVertexIndex = findClosestVertexIndex(
@@ -66,7 +66,7 @@ const pointerDown = (event) => {
 
         sharedState.modeSpecificVariables.move.selectedVertexIndex = selectedVertexIndex;
 
-        
+
         if (selectedVertexIndex !== null) {
           // Perform vertex selection visual feedback
           // For example, change color or scale of the selected vertex
@@ -127,7 +127,7 @@ const pointerUp = (event) => {
       pickedMeshes.length = 0;
       break;
     case "vertexEdit":
-        sharedState.modeSpecificVariables.vertexEdit.isDragging = false;
+      sharedState.modeSpecificVariables.vertexEdit.isDragging = false;
       break;
         
   }
@@ -171,25 +171,25 @@ const pointerMove = (event) => {
         const isDragging = sharedState.modeSpecificVariables.vertexEdit.isDragging;
 
         
-        
-        if (isDragging) {
-            const pickInfoVE = sceneVE.pick(sceneVE.pointerX, sceneVE.pointerY);
-            if (pickInfoVE.hit && pickInfoVE.pickedMesh !== groundVE) {
-            let selectedMesh = pickInfoVE.pickedMesh;
-            sharedState.selectedMesh = selectedMesh;
-    
+
+      if (isDragging) {
+        const pickInfoVE = sceneVE.pick(sceneVE.pointerX, sceneVE.pointerY);
+        if (pickInfoVE.hit && pickInfoVE.pickedMesh !== groundVE) {
+          let selectedMesh = pickInfoVE.pickedMesh;
+          sharedState.selectedMesh = selectedMesh;
+
     
             const selectedVertexIndex =  findClosestVertexIndex(
-                selectedMesh,
-                pickInfoVE.pickedPoint,
-                sharedState.modeSpecificVariables.vertexEdit.vertices
-              );
-            const pickResult = sceneVE.pick(sceneVE.pointerX, sceneVE.pointerY);
-            if (pickResult.hit && pickResult.pickedMesh === selectedMesh) {
-                const newPosition = pickResult.pickedPoint;
-                //moveSelectedVertex(newPosition, selectedVertexIndex, selectedMesh);
-            }
-            }
+            selectedMesh,
+            pickInfoVE.pickedPoint,
+            sharedState.modeSpecificVariables.vertexEdit.vertices
+          );
+          const pickResult = sceneVE.pick(sceneVE.pointerX, sceneVE.pointerY);
+          if (pickResult.hit && pickResult.pickedMesh === selectedMesh) {
+            const newPosition = pickResult.pickedPoint;
+            //moveSelectedVertex(newPosition, selectedVertexIndex, selectedMesh);
+          }
+        }
         };
       break;
   }
